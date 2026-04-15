@@ -1,0 +1,5 @@
+{
+  "name": "Secret Language Converter",
+  "description": "Encrypt and decrypt messages into a secret language of random symbols, numbers, and letters.",
+  "requestFramePermissions": []
+}
