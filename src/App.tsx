@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, Unlock, Copy, Check, Key } from 'lucide-react';
+import { Lock, Unlock, Copy, Check, Key, Share2 } from 'lucide-react';
 
 const MatrixRain = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -150,6 +150,22 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShare = async () => {
+    if (!output || output.startsWith('Error')) return;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Secret Message',
+          text: output,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      handleCopy();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30 flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       <MatrixRain />
@@ -235,14 +251,26 @@ export default function App() {
                 {mode === 'encrypt' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                 {mode === 'encrypt' ? 'Secret Message' : 'Plain Text'}
               </label>
-              <button
-                onClick={handleCopy}
-                disabled={!output || output.startsWith('Error')}
-                className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-emerald-500/20 font-medium"
-              >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Copied!' : 'Copy Result'}
-              </button>
+              <div className="flex items-center gap-2">
+                {typeof navigator !== 'undefined' && !!navigator.share && (
+                  <button
+                    onClick={handleShare}
+                    disabled={!output || output.startsWith('Error')}
+                    className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-emerald-500/20 font-medium"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share
+                  </button>
+                )}
+                <button
+                  onClick={handleCopy}
+                  disabled={!output || output.startsWith('Error')}
+                  className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-emerald-500/20 font-medium"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
             </div>
             <div className={`w-full h-56 sm:h-72 bg-zinc-950/50 border border-zinc-800 rounded-2xl p-5 overflow-auto font-mono text-sm leading-relaxed shadow-inner break-all ${!output ? 'text-zinc-600' : output.startsWith('Error') ? 'text-red-400' : 'text-emerald-400'}`}>
               {output || (mode === 'encrypt' ? "Encrypted text will appear here..." : "Decrypted text will appear here...")}
